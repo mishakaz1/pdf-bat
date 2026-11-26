@@ -28,6 +28,8 @@ contextBridge.exposeInMainWorld('bat', {
   texEngines: inv('tex:engines'),
   texInstall: inv('tex:install'),
   texCompile: inv('tex:compile'),
+  texScratchDir: inv('tex:scratchDir'),
+  dirname: (p) => p.replace(/[\\/][^\\/]*$/, ''),
   onTexProgress: (cb) => ipcRenderer.on('tex-progress', (_e, got, total) => cb(got, total)),
   copyImage: (dataUrl) => clipboard.writeImage(nativeImage.createFromDataURL(dataUrl)),
   copyText: (t) => clipboard.writeText(t),

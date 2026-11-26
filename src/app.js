@@ -113,7 +113,7 @@ class App {
   }
 
   command(cmd) {
-    const p = this.active;
+    const p = this.active && this.active.isTex && !['save', 'saveAs', 'closePane', 'open', 'modeRead', 'modeEdit', 'sidebar', 'theme', 'openTex', 'newTex'].includes(cmd) ? this.active.previewPane : this.active;
     const map = {
       open: () => this.openDialog(),
       save: () => this.save(),
@@ -141,6 +141,7 @@ class App {
     if (mod && !e.shiftKey && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); this.undo(); return; }
     if (mod && ((e.shiftKey && e.key.toLowerCase() === 'z') || e.key.toLowerCase() === 'y') && !typing) { e.preventDefault(); this.redo(); return; }
     if (mod && e.key.toLowerCase() === 'f') { e.preventDefault(); this.openFind(); return; }
+    if (mod && e.key.toLowerCase() === 'j' && !e.repeat) { e.preventDefault(); this.command('duplicate'); return; }
     if (typing) return;
     if (e.key === 'Escape') { this.closeSelPop(); this.closeFind(); if (this.tool !== this.defaultTool()) this.setTool(this.defaultTool()); return; }
     if (e.altKey && e.key === 'ArrowLeft' && this.active) { e.preventDefault(); this.active.back(); return; }
@@ -330,7 +331,6 @@ class App {
     if (this.active === pane) return;
     this.active = pane;
     for (const p of this.panes) p.root.classList.toggle('active', p === pane);
-    if (pane && pane.isTex) { this.renderToolbar(); return; }
     this.sidebar.refresh();
     this.renderToolbar();
     if (this.findBar) this.closeFind();

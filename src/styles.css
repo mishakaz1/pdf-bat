@@ -187,7 +187,6 @@ body.dropping #workspace{outline:3px dashed var(--accent);outline-offset:-8px}
 .tex-head .name{font-weight:550;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-left:4px}
 .tex-body{flex:1;display:flex;min-height:0;position:relative}
 .tex-gutter{width:44px;overflow:hidden;text-align:right;padding:8px 6px 8px 0;color:var(--fg3);font:13px/1.5 var(--mono);background:var(--bg);user-select:none;white-space:pre}
-.tex-src{flex:1;border:0;border-radius:0;resize:none;padding:8px 10px;font:13px/1.5 var(--mono);background:var(--bg2);white-space:pre;overflow:auto;tab-size:2}
 .tex-src:focus{outline:none}
 .tex-log{max-height:30%;overflow:auto;border-top:1px solid var(--line);font:11px/1.4 var(--mono);padding:6px 10px;white-space:pre-wrap;color:var(--fg2);background:var(--bg)}
 .tex-log .err{color:var(--danger)}
@@ -202,3 +201,19 @@ body.dropping #workspace{outline:3px dashed var(--accent);outline-offset:-8px}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid transparent;background-clip:padding-box}
 ::-webkit-scrollbar-thumb:hover{background-color:var(--fg3)}
 ::-webkit-scrollbar-corner{background:transparent}
+.tex-edwrap{position:relative;flex:1;min-width:0}
+.tex-edwrap .tex-hl,.tex-edwrap .tex-src{position:absolute;inset:0;margin:0;padding:8px 10px;font:13px/1.5 var(--mono);white-space:pre;overflow:auto;tab-size:2;border:0;border-radius:0}
+.tex-edwrap .tex-hl{color:var(--fg);pointer-events:none;overflow:hidden}
+.tex-edwrap .tex-src{color:transparent;background:transparent;caret-color:var(--fg);resize:none}
+.tex-edwrap .tex-src::selection{background:var(--sel);color:transparent}
+.tex-hl .tc{color:var(--fg3);font-style:italic}
+.tex-hl .tx{color:#3b6cf6}
+.tex-hl .tk{color:#c2410c;font-weight:600}
+.tex-hl .tm{color:#0f9d58;font-weight:600}
+.tex-hl .tmi{color:#0f9d58}
+.tex-hl .tb{color:var(--fg2)}
+:root[data-theme="dark"] .tex-hl .tx{color:#8aa4ff}
+:root[data-theme="dark"] .tex-hl .tk{color:#ffab70}
+:root[data-theme="dark"] .tex-hl .tm,:root[data-theme="dark"] .tex-hl .tmi{color:#7bd88f}
+.texpane{container-type:inline-size}
+@container (max-width: 520px){ .tex-head select, .tex-head .tex-status{display:none} }

@@ -17,8 +17,8 @@ export class Sidebar {
     this.refreshSoon = debounce(() => this.refresh(), 150);
   }
 
-  get pane() { return this.app.active; }
-  get doc() { return this.app.active && this.app.active.doc; }
+  get pane() { const a = this.app.active; return a && a.isTex ? (a.previewPane && this.app.panes.includes(a.previewPane) ? a.previewPane : null) : a; }
+  get doc() { return this.pane && this.pane.doc; }
 
   setTab(t) { this.tab[this.app.mode] = t; this.refresh(); }
 
