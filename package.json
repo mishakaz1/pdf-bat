@@ -1,7 +1,7 @@
 {
   "name": "pdf-bat",
   "productName": "PDF-Bat",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "PDF-Bat \u2014 a minimalist PDF reader and editor for studying and writing.",
   "main": "main.js",
   "author": "Mike",
