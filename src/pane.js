@@ -50,7 +50,7 @@ export class Pane {
       el('button', { class: 'opt', title: 'Fit page', onclick: () => this.setZoom('fitPage') }, '⤢'),
       el('button', { class: 'opt', title: 'Two-page spread', onclick: () => this.toggleSpread() }, '▯▯'),
       el('button', { class: 'opt', title: 'Bookmark this page (B)', onclick: () => this.toggleBookmark() }, '🔖'),
-      el('button', { title: 'Duplicate pane (Ctrl+D)', onclick: () => this.app.duplicatePane(this) }, '⧉'),
+      el('button', { title: 'Split: same file side by side (Ctrl+J)', onclick: () => this.app.duplicatePane(this) }, '⧉'),
       el('button', { title: 'Close pane (Ctrl+W)', onclick: () => this.app.closePane(this) }, '✕')
     );
     this.zoomEl.addEventListener('click', () => this.setZoom('fitWidth'));

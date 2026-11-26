@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+# Fake pdflatex for UI tests: writes a PDF that contains the document text, no real TeX needed.
+import sys, os, re
+from reportlab.pdfgen import canvas
+args = sys.argv[1:]
+out = args[args.index('-output-directory') + 1]
+tex = args[-1]
+job = os.path.splitext(os.path.basename(tex))[0]
+src = open(tex, encoding='utf-8').read()
+if '\\undefinedmacro' in src:
+    open(os.path.join(out, job + '.log'), 'w').write('! Undefined control sequence.\nl.7 \\undefinedmacro\n')
+    print('! Undefined control sequence.'); sys.exit(1)
+standalone = 'standalone' in src
+size = (120, 30) if standalone else (595, 842)
+c = canvas.Canvas(os.path.join(out, job + '.pdf'), pagesize=size)
+body = src.split('\\begin{document}')[-1].split('\\end{document}')[0]
+y = size[1] - 20
+for line in body.strip().splitlines()[:40]:
+    c.setFont('Helvetica', 10 if standalone else 11); c.drawString(6 if standalone else 60, y if not standalone else 10, line[:80]); y -= 14
+c.showPage(); c.save()
+open(os.path.join(out, job + '.log'), 'w').write('This is fake pdfTeX\nOutput written\n')

@@ -132,8 +132,17 @@ async function compile(source, opts) {
   }
   const ok = fs.existsSync(pdfFile);
   const data = ok ? fs.readFileSync(pdfFile) : null;
+  // pdflatex/xelatex write their messages into the .log file; include it for error parsing
+  let log = res.log;
+  try { if (opts.kind !== 'tectonic') log = fs.readFileSync(path.join(dir, job + '.log'), 'latin1'); } catch (_) {}
   if (!opts.workDir) { try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {} }
-  return { ok: ok && res.code === 0, data, log: res.log, code: res.code };
+  return { ok: ok && res.code === 0, data, log, code: res.code, pdfPath: opts.workDir ? pdfFile : null };
 }
 
-module.exports = { detectEngines, installTectonic, compile };
+function scratchDir(id) {
+  const d = path.join(app.getPath('userData'), 'tex-scratch', String(id).replace(/[^\w-]/g, ''));
+  fs.mkdirSync(d, { recursive: true });
+  return d;
+}
+
+module.exports = { detectEngines, installTectonic, compile, scratchDir };

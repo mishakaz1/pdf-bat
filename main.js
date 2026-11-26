@@ -101,8 +101,8 @@ function buildMenu() {
         { label: 'Read mode', accelerator: 'CmdOrCtrl+1', click: () => send('menu', 'modeRead') },
         { label: 'Edit mode', accelerator: 'CmdOrCtrl+2', click: () => send('menu', 'modeEdit') },
         { type: 'separator' },
-        { label: 'Duplicate pane', accelerator: 'CmdOrCtrl+D', click: () => send('menu', 'duplicate') },
-        { label: 'Find', accelerator: 'CmdOrCtrl+F', click: () => send('menu', 'find') },
+        { label: 'Split: same file side by side', accelerator: 'CmdOrCtrl+J', registerAccelerator: false, click: () => send('menu', 'duplicate') },
+        { label: 'Find', accelerator: 'CmdOrCtrl+F', registerAccelerator: false, click: () => send('menu', 'find') },
         { label: 'Toggle sidebar', accelerator: 'CmdOrCtrl+B', click: () => send('menu', 'sidebar') },
         { label: 'Toggle theme', accelerator: 'CmdOrCtrl+Shift+L', click: () => send('menu', 'theme') },
         { type: 'separator' },
@@ -184,6 +184,7 @@ ipcMain.handle('tex:install', async () => {
     return { ok: true, path: p };
   } catch (e) { return { ok: false, error: String(e.message || e) }; }
 });
+ipcMain.handle('tex:scratchDir', (_e, id) => tex.scratchDir(id));
 ipcMain.handle('tex:compile', async (_e, source, opts) => {
   const r = await tex.compile(source, opts || {});
   return r;

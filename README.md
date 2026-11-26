@@ -11,7 +11,7 @@ Installers for every version are on the [Releases](../../releases) page.
 
 ## Read mode
 
-- Several PDFs side by side; **duplicate** a pane (⧉ / Ctrl+D) to read two places of the same book at once. Drag the divider to resize.
+- Several PDFs side by side; **split** the same file side by side (⧉ / Ctrl+J) to read two places of the same book at once. Drag the divider to resize.
 - Remembers the last page and zoom of every file, and reopens your panes on launch.
 - **Contents** sidebar from the PDF's bookmarks, or detected automatically from headings when the PDF has none. Current section is highlighted.
 - Highlight (several colours), underline, strike-through, pen and marker drawing, eraser, sticky notes, highlight + note.
@@ -42,7 +42,7 @@ Installers for every version are on the [Releases](../../releases) page.
 | X | snapshot | W / B / K / Q | whiteout / rectangle / line / arrow |
 | B | bookmark page | Del | delete selected object |
 
-Ctrl/Cmd: O open, S save, Shift+S save as, D duplicate pane, W close pane, B sidebar, F find, Z/Shift+Z undo/redo, 1/2 Read/Edit mode, Shift+L theme.
+Ctrl/Cmd: O open, S save, Shift+S save as, J split same file side by side, W close pane, B sidebar, F find, Z/Shift+Z undo/redo, 1/2 Read/Edit mode, Shift+L theme.
 
 ## Development
 

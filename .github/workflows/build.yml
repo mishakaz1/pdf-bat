@@ -44,6 +44,19 @@ jobs:
             dist/*.exe
           if-no-files-found: error
 
+  latex:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: wtfjoke/setup-tectonic@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compile LaTeX templates with Tectonic
+        run: node test/latex-compile.mjs tectonic tectonic
+
   release:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

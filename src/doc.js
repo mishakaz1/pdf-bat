@@ -230,6 +230,22 @@ export class Doc extends Emitter {
     setTimeout(() => old.destroy(), 1000);
   }
 
+  // Replace the whole document with fresh bytes from disk (LaTeX preview recompiles)
+  async reloadBytes(bytes) {
+    const ex = await io.extractAnnotations(bytes).catch(() => ({ annotations: [], cleanBytes: null }));
+    this.bytes = ex.cleanBytes || bytes;
+    this.annotations = ex.annotations;
+    this.edits = [];
+    const old = this.pdf;
+    this.pdf = await loadPdfjs(this.bytes);
+    await this.loadSizes();
+    this.contentDirty = false; this.annoDirty = false;
+    this.undoStack = []; this.redoStack = [];
+    this.emit('reload');
+    this.emit('dirty');
+    setTimeout(() => old.destroy(), 1000);
+  }
+
   // Explicit save: flatten edit objects, fill forms, write annotations into the PDF.
   async save(targetPath) {
     let base = this.bytes;
