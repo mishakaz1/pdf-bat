@@ -4,6 +4,8 @@ import { Pane } from './pane.js';
 import { Sidebar } from './sidebar.js';
 import { Editor } from './edit.js';
 import { el, $, $$, toast, debounce, hexToRgb, rgbToHex, prompt, modal, clamp } from './util.js';
+// other formats that are converted to PDF on open (the converter itself loads only when needed)
+const CONVERTIBLE = /\.(djvu|djv|epub|fb2|fb2\.zip|cbz|jpe?g|png|webp|gif|bmp)$/i;
 
 const HL_COLORS = ['#ffd400', '#7bd88f', '#5ec8f2', '#ff8fb1', '#c792ea', '#ff9e57'];
 const PEN_COLORS = ['#d9453b', '#1d4ed8', '#111111', '#16a34a', '#f59e0b', '#9333ea'];
@@ -94,7 +96,7 @@ class App {
       depth = 0; document.body.classList.remove('dropping');
       if (!e.dataTransfer.files.length) return;
       e.preventDefault();
-      const paths = Array.from(e.dataTransfer.files).map(f => window.bat.pathForFile(f)).filter(p => /\.pdf$/i.test(p));
+      const paths = Array.from(e.dataTransfer.files).map(f => window.bat.pathForFile(f)).filter(p => /\.(pdf|tex)$/i.test(p) || CONVERTIBLE.test(p));
       const tex = Array.from(e.dataTransfer.files).map(f => window.bat.pathForFile(f)).filter(p => /\.tex$/i.test(p));
       if (paths.length) this.openPaths(paths);
       for (const t of tex) this.openTexFile(t);
@@ -274,6 +276,12 @@ class App {
     if (paths.length) await this.openPaths(paths);
   }
   async openPaths(paths) {
+    if (paths.some(p => CONVERTIBLE.test(p))) {
+      const { convertPaths } = await import('./convert.js');
+      const settings = await window.bat.getSettings();
+      paths = await convertPaths(paths, { pageSize: settings.bookPageSize || 'A5' },
+        (p, e) => { console.error(e); toast(`Could not convert ${p.split(/[\\/]/).pop()}: ${e.message}`, 6000); });
+    }
     for (const p of paths) {
       if (/\.tex$/i.test(p)) { this.openTexFile(p); continue; }
       try {

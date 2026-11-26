@@ -3,6 +3,7 @@ const { app, BrowserWindow, ipcMain, dialog, Menu, shell, nativeTheme } = requir
 const path = require('path');
 const fs = require('fs');
 const tex = require('./tex');
+const conv = require('./convert');
 const updater = require('./updater');
 let updates = null;
 
@@ -40,7 +41,7 @@ let quitting = false;
 const pendingPaths = [];
 
 function pdfArgs(argv) {
-  return argv.slice(1).filter(a => /\.pdf$/i.test(a) && fs.existsSync(a));
+  return argv.slice(1).filter(a => (/\.(pdf|tex)$/i.test(a) || conv.FORMATS.test(a)) && fs.existsSync(a));
 }
 
 function createWindow() {
@@ -135,7 +136,12 @@ function buildMenu() {
 ipcMain.handle('dialog:open', async () => {
   const r = await dialog.showOpenDialog(win, {
     properties: ['openFile', 'multiSelections'],
-    filters: [{ name: 'PDF', extensions: ['pdf'] }]
+    filters: [
+      { name: 'All supported', extensions: ['pdf', 'djvu', 'djv', 'epub', 'fb2', 'zip', 'cbz', 'jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'] },
+      { name: 'PDF', extensions: ['pdf'] },
+      { name: 'Books (DjVu, EPUB, FB2, CBZ)', extensions: ['djvu', 'djv', 'epub', 'fb2', 'zip', 'cbz'] },
+      { name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'] }
+    ]
   });
   return r.canceled ? [] : r.filePaths;
 });
@@ -201,6 +207,31 @@ ipcMain.handle('tex:compile', async (_e, source, opts) => {
   const r = await tex.compile(source, opts || {});
   return r;
 });
+
+// ---------- conversion of other formats to PDF ----------
+ipcMain.handle('convert:target', (_e, src) => conv.targetFor(src, store));
+ipcMain.handle('convert:remember', (_e, src, out) => { conv.remember(src, out, store); scheduleSave(); return true; });
+ipcMain.handle('convert:zipList', (_e, src) => conv.zipEntries(fs.readFileSync(src)).filter(e => !e.name.endsWith('/')).map(e => e.name));
+ipcMain.handle('convert:zipFile', (_e, src, name) => {
+  const buf = fs.readFileSync(src);
+  const e = conv.zipEntries(buf).find(x => x.name === name);
+  if (!e) throw new Error('missing ' + name);
+  return conv.zipRead(buf, e);
+});
+ipcMain.handle('convert:extract', (_e, src) => conv.extractZip(src));
+ipcMain.handle('convert:writeTmp', (_e, files) => {
+  const dir = conv.newTmpDir();
+  for (const [name, data] of Object.entries(files)) {
+    const dest = path.resolve(dir, name);
+    if (!dest.startsWith(dir + path.sep)) continue;
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.writeFileSync(dest, typeof data === 'string' ? data : Buffer.from(data));
+  }
+  return dir;
+});
+ipcMain.handle('convert:print', (e, dir, files, opts) =>
+  conv.printFiles(dir, files.map(f => path.resolve(dir, f)), opts, (i, n) => e.sender.send('convert-progress', i, n)));
+ipcMain.handle('convert:cleanup', (_e, dir) => conv.cleanup(dir));
 
 ipcMain.handle('file:exists', (_e, p) => fs.existsSync(p));
 

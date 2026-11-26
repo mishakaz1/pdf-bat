@@ -31,6 +31,19 @@ Installers for every version are on the [Releases](../../releases) page.
 - Edits stay movable until you **Save** (Ctrl+S), then they are written into the PDF. Save As keeps the original.
 - LaTeX (full documents with live preview, LaTeX on pages) — in progress, only loaded in Edit mode.
 
+## Other formats: DjVu, EPUB, FB2, CBZ, images
+
+Open them like a PDF (Open, drag and drop, or Open With). PDF-Bat converts the file once into a PDF
+next to the original (`book.djvu` → `book.pdf`) and opens that; opening the original again reuses it.
+
+- **DjVu**: page images, decoded with [DjVu.js](https://github.com/RussCoder/djvujs) (GPL v2, in `src/djvujs`).
+  Black-and-white pages stay 1-bit (sharp), colour pages keep DjVu's layers: background as JPEG,
+  text as a full-resolution mask. The DjVu table of contents becomes PDF bookmarks.
+- **EPUB, FB2**: laid out into pages by Chromium (any language, the book's own fonts and images),
+  A5 pages, table of contents → bookmarks. Scripts and network access inside the book are blocked.
+  DRM-protected books cannot be opened.
+- **CBZ, JPG, PNG, WebP, GIF, BMP**: one page per image; several images selected together become one PDF.
+
 ## Updates
 
 Windows installs updates automatically (downloaded in the background, installed on restart). macOS shows a notice with a one-click download of the new .dmg. *Help → Check for Updates…* checks manually.
