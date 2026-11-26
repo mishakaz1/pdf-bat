@@ -1,6 +1,7 @@
 // A viewer pane: continuous-scroll view of one Doc with its own position and zoom.
 import { pdfjsLib, pageText } from './doc.js';
 import { el, sv, debounce, clamp, uid, rgbToHex, hexToRgb, toast, nextFrame } from './util.js';
+import { bindLinkPreview, smartJump, hidePreview } from './preview.js';
 
 const MAX_CANVAS_PIXELS = 16_000_000;
 
@@ -75,6 +76,17 @@ export class Pane {
       }
     }, { passive: false });
     this.scrollEl.addEventListener('mouseup', (e) => this.onMouseUp(e));
+    // smart jump: Alt+click or middle-click on "Figure 3", "(2.14)", "Theorem 4" … shows a preview of it
+    this.scrollEl.addEventListener('mousedown', (e) => {
+      if (e.button === 1 || (e.button === 0 && e.altKey)) {
+        if (e.target.closest && e.target.closest('.textLayer span')) {
+          e.preventDefault(); e.stopPropagation();
+          smartJump(this, e);
+        }
+      }
+    }, true);
+    this.scrollEl.addEventListener('auxclick', (e) => { if (e.button === 1) e.preventDefault(); });
+    this.scrollEl.addEventListener('scroll', () => hidePreview(), { passive: true });
     this.scrollEl.addEventListener('mousemove', (e) => this.onMouseMoveRuler(e));
     this.installHandDrag();
     this.ro = new ResizeObserver(debounce(() => { if (this.zoomMode !== 'custom') this.applyZoom(); this.centerH(); }, 80));
@@ -390,6 +402,7 @@ export class Pane {
         link.addEventListener('click', (e) => { e.preventDefault(); if (/^(https?|mailto):/i.test(url)) window.open(url); });
       } else if (a.dest) {
         link.addEventListener('click', (e) => { e.preventDefault(); this.gotoDest(a.dest); });
+        bindLinkPreview(this, link, () => resolveDest(this.doc.pdf, a.dest).catch(() => null));
       } else continue;
       layer.append(link);
     }

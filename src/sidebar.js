@@ -71,7 +71,18 @@ export class Sidebar {
       });
     };
     build(res.items, wrap, '');
-    this.body.append(wrap);
+    const filter = el('input', { placeholder: 'Search contents…', style: { width: 'calc(100% - 8px)', margin: '0 4px 6px' } });
+    filter.value = this.outlineFilter || '';
+    const applyFilter = () => {
+      const q = filter.value.trim().toLowerCase();
+      this.outlineFilter = filter.value;
+      wrap.querySelectorAll('.item').forEach(r => { r.style.display = !q || r._item.title.toLowerCase().includes(q) ? '' : 'none'; });
+      wrap.querySelectorAll('.children').forEach(c => { if (q) c.classList.remove('collapsed'); });
+    };
+    filter.addEventListener('input', applyFilter);
+    filter.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const r = Array.from(wrap.querySelectorAll('.item')).find(x => x.style.display !== 'none'); if (r) r.click(); } });
+    this.body.append(filter, wrap);
+    if (filter.value) applyFilter();
     this.outlineRows = Array.from(wrap.querySelectorAll('.item'));
     this.highlightCurrentSection();
   }
@@ -206,9 +217,14 @@ export class Sidebar {
       ...[['all', 'All'], ['note', 'Notes'], ['highlight', 'Highlights'], ['ink', 'Drawings']].map(([k, l]) =>
         el('button', { class: filter === k ? 'on' : '', onclick: () => { this.notesFilter = k; this.refresh(); } }, l)),
       el('button', { title: 'Export notes & highlights as Markdown', onclick: () => this.exportMarkdown() }, '⇩ .md'));
-    this.body.append(bar);
+    const search = el('input', { placeholder: 'Search notes & highlights…', style: { width: 'calc(100% - 8px)', margin: '0 4px 6px' } });
+    search.value = this.notesQuery || '';
+    search.addEventListener('input', () => { this.notesQuery = search.value; const pos = search.selectionStart; this.refresh(); const s2 = this.body.querySelector('input'); if (s2) { s2.focus(); s2.setSelectionRange(pos, pos); } });
+    this.body.append(bar, search);
     const list = el('div', { class: 'list' });
-    const shown = items.filter(a => filter === 'all' || (filter === 'highlight' ? ['highlight', 'underline', 'strike'].includes(a.type) : a.type === filter));
+    const q = (this.notesQuery || '').trim().toLowerCase();
+    const shown = items.filter(a => filter === 'all' || (filter === 'highlight' ? ['highlight', 'underline', 'strike'].includes(a.type) : a.type === filter))
+      .filter(a => !q || [a.text, a.note].some(t => t && t.toLowerCase().includes(q)));
     if (!shown.length) list.append(el('div', { class: 'side-hint' }, 'Nothing yet. Use the toolbar to highlight, draw or add notes — they are saved inside the PDF.'));
     for (const a of shown) {
       const label = { highlight: 'Highlight', underline: 'Underline', strike: 'Strike-through', ink: 'Drawing', note: 'Note', freetext: 'Text' }[a.type] || a.type;

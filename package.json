@@ -1,7 +1,7 @@
 {
   "name": "pdf-bat",
   "productName": "PDF-Bat",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "PDF-Bat \u2014 a minimalist PDF reader and editor for studying and writing.",
   "main": "main.js",
   "author": "Mike",
@@ -9,16 +9,16 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "test": "node test/smoke.js && node test/latex-ui.js && node test/center.js",
+    "test": "node test/smoke.js && node test/latex-ui.js && node test/center.js && node test/preview.js",
     "dist": "electron-builder",
     "dist:mac": "electron-builder --mac",
     "dist:win": "electron-builder --win",
     "postinstall": "node scripts/vendor.js"
   },
   "devDependencies": {
+    "@pdf-lib/fontkit": "1.1.1",
     "electron": "45.5.0",
     "electron-builder": "26.18.0",
-    "@pdf-lib/fontkit": "1.1.1",
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "4.10.38"
   },
@@ -39,7 +39,7 @@
       "assets/**/*",
       "build/icon.png",
       "!**/*.map",
-      "!node_modules/**"
+      "updater.js"
     ],
     "fileAssociations": [
       {
@@ -91,6 +91,14 @@
       ],
       "category": "Office"
     },
-    "publish": null
+    "publish": {
+      "provider": "github",
+      "owner": "mishakaz1",
+      "repo": "pdf-bat",
+      "releaseType": "release"
+    }
+  },
+  "dependencies": {
+    "electron-updater": "6.6.2"
   }
 }

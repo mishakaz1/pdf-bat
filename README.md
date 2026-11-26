@@ -17,7 +17,9 @@ Installers for every version are on the [Releases](../../releases) page.
 - Highlight (several colours), underline, strike-through, pen and marker drawing, eraser, sticky notes, highlight + note.
 - **Annotations are saved inside the PDF** as standard PDF annotations (visible in Acrobat, Preview, browsers) — saved automatically.
 - Page thumbnails, bookmarks, Notes panel with Markdown export.
-- Find (Ctrl+F), clickable internal links with Back/Forward (Alt+←/→), two-page spread, fit width / page.
+- Find (Ctrl+F), clickable internal links with Back/Forward (Alt+←/→), two-page spread, fit width / page. Pages stay centred until you scroll sideways.
+- **Smart jump:** Alt+click / middle-click “Figure 3”, “(2.14)”, “Theorem 4.1”, “Table 2”, “Section 3.2” to preview it, even without links. Hover internal links to preview their target.
+- Ctrl+P quick open of recent files; search in Contents and Notes.
 - Snapshot a region to the clipboard, reading ruler, dark pages (inverted) for night reading, dark/light theme.
 
 ## Edit mode
@@ -28,6 +30,10 @@ Installers for every version are on the [Releases](../../releases) page.
 - Pages: reorder by drag and drop, rotate, delete, insert blank page, insert another PDF, extract pages to a new file, crop margins.
 - Edits stay movable until you **Save** (Ctrl+S), then they are written into the PDF. Save As keeps the original.
 - LaTeX (full documents with live preview, LaTeX on pages) — in progress, only loaded in Edit mode.
+
+## Updates
+
+Windows installs updates automatically (downloaded in the background, installed on restart). macOS shows a notice with a one-click download of the new .dmg. *Help → Check for Updates…* checks manually.
 
 ## Shortcuts
 
@@ -42,7 +48,7 @@ Installers for every version are on the [Releases](../../releases) page.
 | X | snapshot | W / B / K / Q | whiteout / rectangle / line / arrow |
 | B | bookmark page | Del | delete selected object |
 
-Ctrl/Cmd: O open, S save, Shift+S save as, J split same file side by side, W close pane, B sidebar, F find, Z/Shift+Z undo/redo, 1/2 Read/Edit mode, Shift+L theme.
+Ctrl/Cmd: O open, P open recent, S save, Shift+S save as, J split same file side by side, W close pane, B sidebar, F find, Z/Shift+Z undo/redo, 1/2 Read/Edit mode, Shift+L theme.
 
 ## Development
 

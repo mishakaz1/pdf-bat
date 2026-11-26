@@ -35,6 +35,10 @@ jobs:
         run: npx electron-builder ${{ matrix.target }} --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Check update metadata (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: test -f dist/latest.yml && cat dist/latest.yml
       - name: Upload installers
         uses: actions/upload-artifact@v4
         with:
@@ -42,6 +46,8 @@ jobs:
           path: |
             dist/*.dmg
             dist/*.exe
+            dist/*.blockmap
+            dist/latest*.yml
           if-no-files-found: error
 
   latex:
