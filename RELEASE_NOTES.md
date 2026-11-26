@@ -6,7 +6,9 @@
 - LaTeX engine: **Tectonic** is downloaded on first use (needs internet once; it fetches packages on demand). An installed MacTeX / MiKTeX / TeX Live is detected automatically.
 - LaTeX is only loaded in Edit mode.
 
-**Reading:** `Ctrl+J` (Cmd+J) opens the same file side by side.
+**Reading:**
+- `Ctrl+J` (Cmd+J) opens the same file side by side.
+- Pages stay centred in their pane when you zoom, split or resize, until you scroll sideways yourself (Fit width re-centres).
 
 ### Install
 - **Windows:** `PDF-Bat-Setup-0.2.0.exe`. SmartScreen may warn (not code-signed yet): *More info → Run anyway*.

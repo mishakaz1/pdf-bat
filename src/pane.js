@@ -19,6 +19,8 @@ export class Pane {
     this.future = [];
     this.find = null;
     this.ruler = false;
+    this.hCenter = true;      // keep pages horizontally centred until the user scrolls sideways
+    this._lastLeft = 0;
     this.buildDom();
     this.unsub = [
       doc.on('annotations', (p) => this.refreshOverlays(p)),
@@ -75,7 +77,7 @@ export class Pane {
     this.scrollEl.addEventListener('mouseup', (e) => this.onMouseUp(e));
     this.scrollEl.addEventListener('mousemove', (e) => this.onMouseMoveRuler(e));
     this.installHandDrag();
-    this.ro = new ResizeObserver(debounce(() => { if (this.zoomMode !== 'custom') this.applyZoom(); }, 80));
+    this.ro = new ResizeObserver(debounce(() => { if (this.zoomMode !== 'custom') this.applyZoom(); this.centerH(); }, 80));
     this.ro.observe(this.scrollEl);
     this.updateHead();
   }
@@ -154,6 +156,7 @@ export class Pane {
   // ---------- zoom ----------
   setZoom(mode) {
     this.zoomMode = mode;
+    this.hCenter = true;
     this.applyZoom();
   }
   zoomBy(f, ev) {
@@ -174,7 +177,8 @@ export class Pane {
     if (Math.abs(old - this.scale) < 1e-4) { this.updateHead(); return; }
     this.resizePages();
     this.goto(page, { offset: off, noSave: false });
-    if (ax) this.scrollEl.scrollLeft = (ax.sx + ax.px) * (this.scale / old) - ax.px;
+    if (ax && !this.hCenter) { this.scrollEl.scrollLeft = (ax.sx + ax.px) * (this.scale / old) - ax.px; this._lastLeft = this.scrollEl.scrollLeft; }
+    this.centerH();
     for (const v of this.views) if (v.rendered) v.stale = true;
     this.renderVisibleSoon();
     this.updateHead();
@@ -209,7 +213,7 @@ export class Pane {
       y = v.div.offsetTop + vy - 30;
     }
     this.scrollEl.scrollTop = Math.max(0, y);
-    if (this.spread) this.scrollEl.scrollLeft = 0;
+    this.centerH();
     this.current = i;
     this.updateHead();
     this.app.onPaneMoved(this);
@@ -238,7 +242,22 @@ export class Pane {
     } catch (e) { console.warn('bad destination', e); }
   }
 
+  centerH() {
+    if (!this.hCenter) return;
+    const el = this.scrollEl;
+    el.scrollLeft = Math.max(0, (el.scrollWidth - el.clientWidth) / 2);
+    this._lastLeft = el.scrollLeft;
+    this._lastGeo = el.scrollWidth + 'x' + el.clientWidth;
+  }
+
   onScroll() {
+    const el = this.scrollEl;
+    const left = el.scrollLeft, geo = el.scrollWidth + 'x' + el.clientWidth;
+    // a sideways move while the content width is unchanged = the user scrolled horizontally
+    if (Math.abs(left - this._lastLeft) > 1 && geo === this._lastGeo) this.hCenter = false;
+    else if (geo !== this._lastGeo) this.centerH();
+    this._lastLeft = el.scrollLeft;
+    this._lastGeo = geo;
     // find the page at 30% of the viewport height
     const probe = this.scrollEl.scrollTop + this.scrollEl.clientHeight * 0.3;
     let lo = 0, hi = this.views.length - 1, best = 0;
