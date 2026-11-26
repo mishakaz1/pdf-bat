@@ -1,12 +1,13 @@
 name: Build installers
 
+# Every push to main builds the macOS .dmg and Windows .exe.
+# When package.json has a version that has no GitHub Release yet, a release
+# "vX.Y.Z" is created with the installers attached, so every version is kept.
+
 on:
   push:
     branches: [main]
-    tags: ['v*']
   pull_request:
-  release:
-    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -34,7 +35,7 @@ jobs:
         run: npx electron-builder ${{ matrix.target }} --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-      - name: Upload installers (workflow artifact)
+      - name: Upload installers
         uses: actions/upload-artifact@v4
         with:
           name: PDF-Bat-${{ runner.os }}
@@ -42,11 +43,32 @@ jobs:
             dist/*.dmg
             dist/*.exe
           if-no-files-found: error
-      - name: Attach to GitHub Release (tags only)
-        if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
+
+  release:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read version
+        id: v
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          if gh release view "v$VERSION" >/dev/null 2>&1; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        if: steps.v.outputs.exists == 'false'
+        with:
+          path: installers
+          merge-multiple: true
+      - name: Create release
+        if: steps.v.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.release.tag_name || github.ref_name }}
-          files: |
-            dist/*.dmg
-            dist/*.exe
+          tag_name: ${{ steps.v.outputs.tag }}
+          name: PDF-Bat ${{ steps.v.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          body_path: RELEASE_NOTES.md
+          files: installers/*
