@@ -81,6 +81,9 @@ class App {
     window.bat.onMenu((cmd) => this.command(cmd));
     window.bat.onOpenPaths((ps) => this.openPaths(ps));
     window.bat.onCloseRequest(() => this.onCloseRequest());
+    window.bat.onUpdateStatus && window.bat.onUpdateStatus((u) => {
+      if (u.status === 'downloading' && u.version && this._updToast !== u.version) { this._updToast = u.version; toast(`Downloading PDF-Bat ${u.version} in the background…`, 4000); }
+    });
     window.bat.onTexProgress && window.bat.onTexProgress((g, t) => this.emitTexProgress && this.emitTexProgress(g, t));
     // drag & drop
     let depth = 0;
@@ -129,7 +132,8 @@ class App {
       fitWidth: () => p && p.setZoom('fitWidth'),
       find: () => this.openFind(),
       openTex: () => this.openTexDialog(),
-      newTex: () => this.newTex()
+      newTex: () => this.newTex(),
+      quickOpen: () => this.quickOpen()
     };
     if (map[cmd]) map[cmd]();
   }
@@ -141,9 +145,10 @@ class App {
     if (mod && !e.shiftKey && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); this.undo(); return; }
     if (mod && ((e.shiftKey && e.key.toLowerCase() === 'z') || e.key.toLowerCase() === 'y') && !typing) { e.preventDefault(); this.redo(); return; }
     if (mod && e.key.toLowerCase() === 'f') { e.preventDefault(); this.openFind(); return; }
+    if (mod && e.key.toLowerCase() === 'p' && !e.shiftKey) { e.preventDefault(); this.quickOpen(); return; }
     if (mod && e.key.toLowerCase() === 'j' && !e.repeat) { e.preventDefault(); this.command('duplicate'); return; }
     if (typing) return;
-    if (e.key === 'Escape') { this.closeSelPop(); this.closeFind(); if (this.tool !== this.defaultTool()) this.setTool(this.defaultTool()); return; }
+    if (e.key === 'Escape') { import('./preview.js').then(m => m.hidePreview()); this.closeSelPop(); this.closeFind(); if (this.tool !== this.defaultTool()) this.setTool(this.defaultTool()); return; }
     if (e.altKey && e.key === 'ArrowLeft' && this.active) { e.preventDefault(); this.active.back(); return; }
     if (e.altKey && e.key === 'ArrowRight' && this.active) { e.preventDefault(); this.active.forward(); return; }
     if (mod || e.altKey) return;
@@ -407,6 +412,49 @@ class App {
     this._saveSession();
     await new Promise(r => setTimeout(r, 150));
     window.bat.closeWindow();
+  }
+
+  // ---------- quick open (Ctrl+P) ----------
+  async quickOpen() {
+    if (this._qo) return;
+    const recent = await window.bat.getRecent();
+    const open = this.panes.filter(p => !p.isTex).map(p => p.doc.path);
+    const all = Array.from(new Set(open.concat(recent)));
+    const input = el('input', { placeholder: 'Type to filter recent files…', style: { width: '100%' } });
+    const list = el('div', { class: 'list', style: { maxHeight: '50vh', overflow: 'auto', marginTop: '8px' } });
+    let items = [], sel = 0;
+    const score = (p, q) => {
+      if (!q) return 1;
+      const name = p.split(/[\\/]/).pop().toLowerCase();
+      q = q.toLowerCase();
+      if (name.includes(q)) return 3 - name.indexOf(q) / 100;
+      let i = 0; for (const c of name) if (c === q[i]) i++;
+      return i === q.length ? 1 : (p.toLowerCase().includes(q) ? 0.5 : 0);
+    };
+    const render = () => {
+      items = all.map(p => [p, score(p, input.value)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).map(x => x[0]).slice(0, 30);
+      sel = Math.min(sel, Math.max(0, items.length - 1));
+      list.textContent = '';
+      items.forEach((p, i) => {
+        const r = el('div', { class: 'entry', style: { borderLeftColor: i === sel ? 'var(--accent)' : 'transparent', background: i === sel ? 'var(--bg3)' : '' } },
+          el('div', {}, p.split(/[\\/]/).pop() + (open.includes(p) ? '  ·  open' : '')), el('div', { class: 'meta' }, p));
+        r.addEventListener('click', () => go(p));
+        list.append(r);
+      });
+      if (!items.length) list.append(el('div', { class: 'side-hint' }, 'No matching files. Ctrl+O to browse.'));
+    };
+    const go = (p) => { m.close(null); if (p) this.openPaths([p]); };
+    const m = modal('Open recent', [el('div', { style: { width: 'min(560px, 86vw)' } }, input, list)], [{ label: 'Browse…', action: () => { this.openDialog(); return null; } }, { label: 'Cancel', value: null }]);
+    this._qo = m;
+    m.done.then(() => { this._qo = null; });
+    input.addEventListener('input', () => { sel = 0; render(); });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(items.length - 1, sel + 1); render(); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(0, sel - 1); render(); }
+      if (e.key === 'Enter') { e.preventDefault(); go(items[sel]); }
+    });
+    render();
+    setTimeout(() => input.focus(), 0);
   }
 
   // ---------- session ----------

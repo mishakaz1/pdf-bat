@@ -3,6 +3,8 @@ const { app, BrowserWindow, ipcMain, dialog, Menu, shell, nativeTheme } = requir
 const path = require('path');
 const fs = require('fs');
 const tex = require('./tex');
+const updater = require('./updater');
+let updates = null;
 
 if (process.env.PDFBAT_USERDATA) app.setPath('userData', process.env.PDFBAT_USERDATA);
 
@@ -80,11 +82,17 @@ function send(ch, ...args) { if (win) win.webContents.send(ch, ...args); }
 function buildMenu() {
   const isMac = process.platform === 'darwin';
   const template = [
-    ...(isMac ? [{ role: 'appMenu' }] : []),
+    ...(isMac ? [{ label: app.name, submenu: [
+      { role: 'about' },
+      { label: 'Check for Updates…', click: () => updates && updates.check(true) },
+      { type: 'separator' }, { role: 'services' }, { type: 'separator' },
+      { role: 'hide' }, { role: 'hideOthers' }, { role: 'unhide' }, { type: 'separator' }, { role: 'quit' }
+    ] }] : []),
     {
       label: 'File',
       submenu: [
         { label: 'Open…', accelerator: 'CmdOrCtrl+O', click: () => send('menu', 'open') },
+        { label: 'Open Recent…', accelerator: 'CmdOrCtrl+P', registerAccelerator: false, click: () => send('menu', 'quickOpen') },
         { label: 'Save', accelerator: 'CmdOrCtrl+S', click: () => send('menu', 'save') },
         { label: 'Save As…', accelerator: 'CmdOrCtrl+Shift+S', click: () => send('menu', 'saveAs') },
         { label: 'Open LaTeX file…', click: () => send('menu', 'openTex') },
@@ -114,7 +122,11 @@ function buildMenu() {
         { role: 'toggleDevTools' }
       ]
     },
-    { role: 'windowMenu' }
+    { role: 'windowMenu' },
+    ...(isMac ? [] : [{ label: 'Help', submenu: [
+      { label: 'Check for Updates…', click: () => updates && updates.check(true) },
+      { label: 'About PDF-Bat', click: () => dialog.showMessageBox(win, { type: 'info', message: 'PDF-Bat ' + app.getVersion(), detail: 'github.com/mishakaz1/pdf-bat' }) }
+    ] }])
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
@@ -214,6 +226,8 @@ ipcMain.handle('app:asset', (_e, rel) => {
 });
 ipcMain.handle('app:cancelClose', () => { quitting = false; });
 ipcMain.handle('app:forceClose', () => { forceClose = true; if (win) win.close(); if (quitting) app.quit(); });
+ipcMain.handle('app:version', () => app.getVersion());
+ipcMain.handle('app:checkUpdates', () => updates && updates.check(true));
 ipcMain.handle('app:pendingPaths', () => pendingPaths.splice(0));
 ipcMain.handle('app:systemDark', () => nativeTheme.shouldUseDarkColors);
 
@@ -242,6 +256,8 @@ if (!gotLock) {
     loadStore();
     pendingPaths.push(...pdfArgs(process.argv));
     createWindow();
+    updates = updater.setup({ getWindow: () => win, store, saveStore: scheduleSave, send });
+    app.on('pdfbat-before-update', () => { forceClose = true; flushStore(); });
     app.on('activate', () => { if (!win) createWindow(); });
   });
 

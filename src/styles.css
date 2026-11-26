@@ -217,3 +217,12 @@ body.dropping #workspace{outline:3px dashed var(--accent);outline-offset:-8px}
 :root[data-theme="dark"] .tex-hl .tm,:root[data-theme="dark"] .tex-hl .tmi{color:#7bd88f}
 .texpane{container-type:inline-size}
 @container (max-width: 520px){ .tex-head select, .tex-head .tex-status{display:none} }
+
+/* previews (link hover, smart jump) */
+.pv-pop{position:fixed;z-index:120;background:var(--bg2);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;cursor:pointer}
+.pv-pop.small{cursor:default}
+.pv-canvas{background:#fff;line-height:0}
+.dark-pages .pv-canvas canvas{filter:invert(.92) hue-rotate(180deg)}
+.pv-label{padding:5px 10px;color:var(--fg2);font-size:12px;border-top:1px solid var(--line)}
+.pv-pop.small .pv-label{border-top:0}
+.tabs::-webkit-scrollbar{display:none}

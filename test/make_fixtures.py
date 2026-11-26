@@ -42,3 +42,20 @@ def book(path, bookmarks):
     c.save()
 book(sys.argv[1] + '/book-bookmarks.pdf', True)
 book(sys.argv[1] + '/book-plain.pdf', False)
+
+def refs(path):
+    c = canvas.Canvas(path, pagesize=A4)
+    W, H = A4
+    c.setFont('DV', 10.5)
+    c.drawString(72, H-100, 'As shown in Figure 2, the period follows from Eq. (2.14) and Theorem 3.1.')
+    c.showPage()
+    for p in range(2, 6):
+        c.setFont('DV', 10.5); c.drawString(72, H-100, f'Filler text on page {p}. See also Figure 2 again.')
+        if p == 3:
+            c.drawString(150, 500, 'T = 2 pi sqrt(l / g)'); c.drawString(470, 500, '(2.14)')
+            c.setFont('DVB', 10.5); c.drawString(72, 400, 'Theorem 3.1. Small oscillations are harmonic.')
+        if p == 5:
+            c.rect(150, 400, 250, 150); c.setFont('DV', 9.5); c.drawString(110, 380, 'Figure 2. A simple pendulum of length l.')
+        c.showPage()
+    c.save()
+refs(sys.argv[1] + '/refs.pdf')
