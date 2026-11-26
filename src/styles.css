@@ -26,7 +26,7 @@ a{color:var(--accent)}
 .mac #topbar{padding-left:80px}
 #topbar button,#topbar input,#topbar select,#topbar .swatch{-webkit-app-region:no-drag}
 .brand{font-weight:650;letter-spacing:.2px;display:flex;align-items:center;gap:6px}
-.logo{color:var(--accent)}
+.logo{width:20px;height:20px;display:block}
 .seg{display:flex;background:var(--bg3);border-radius:8px;padding:2px}
 .seg button{border-radius:6px;padding:3px 12px}
 .toolbar{display:flex;align-items:center;gap:2px}
@@ -53,7 +53,7 @@ a{color:var(--accent)}
 #welcome{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
 #welcome .welcome-card{pointer-events:auto;text-align:center;color:var(--fg2)}
 #welcome h1{margin:4px 0 6px;color:var(--fg);font-weight:600}
-.logo.big{font-size:44px}
+.logo.big{width:72px;height:72px;margin:0 auto}
 #recentList{margin-top:18px;text-align:left;max-width:440px}
 #recentList div{padding:5px 10px;border-radius:6px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #recentList div:hover{background:var(--bg3);color:var(--fg)}

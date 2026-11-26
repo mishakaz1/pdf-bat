@@ -27,6 +27,7 @@ const SHOTS = path.join(__dirname, 'shots');
   await win.mouse.click(pg.x + 120, pg.y + 520);
   await win.waitForSelector('.modal textarea.code');
   check(await win.evaluate(() => !!app._latex), 'LaTeX module loaded on first use in Edit mode');
+  await win.focus('.modal textarea.code');
   await win.keyboard.type('E = mc^2');
   await win.waitForSelector('.modal .preview img', { timeout: 15000 });
   await win.screenshot({ path: path.join(SHOTS, '10-latex-snippet.png') });
