@@ -1,0 +1,40 @@
+'use strict';
+const { contextBridge, ipcRenderer, webUtils, clipboard, nativeImage } = require('electron');
+const inv = (ch) => (...a) => ipcRenderer.invoke(ch, ...a);
+
+contextBridge.exposeInMainWorld('bat', {
+  platform: process.platform,
+  openDialog: inv('dialog:open'),
+  saveDialog: inv('dialog:save'),
+  openImage: inv('dialog:openImage'),
+  openTexDialog: inv('dialog:openTex'),
+  saveTexDialog: inv('dialog:saveTex'),
+  confirm: inv('dialog:confirm'),
+  readFile: inv('file:read'),
+  writeFile: inv('file:write'),
+  readText: inv('file:readText'),
+  writeText: inv('file:writeText'),
+  exists: inv('file:exists'),
+  getDoc: inv('store:getDoc'),
+  setDoc: inv('store:setDoc'),
+  getSettings: inv('store:getSettings'),
+  setSettings: inv('store:setSettings'),
+  getSession: inv('store:getSession'),
+  setSession: inv('store:setSession'),
+  getRecent: inv('store:getRecent'),
+  pendingPaths: inv('app:pendingPaths'),
+  asset: inv('app:asset'),
+  systemDark: inv('app:systemDark'),
+  texEngines: inv('tex:engines'),
+  texInstall: inv('tex:install'),
+  texCompile: inv('tex:compile'),
+  onTexProgress: (cb) => ipcRenderer.on('tex-progress', (_e, got, total) => cb(got, total)),
+  copyImage: (dataUrl) => clipboard.writeImage(nativeImage.createFromDataURL(dataUrl)),
+  copyText: (t) => clipboard.writeText(t),
+  closeWindow: () => ipcRenderer.invoke('app:forceClose'),
+  cancelClose: () => ipcRenderer.invoke('app:cancelClose'),
+  pathForFile: (f) => webUtils.getPathForFile(f),
+  onMenu: (cb) => ipcRenderer.on('menu', (_e, cmd) => cb(cmd)),
+  onCloseRequest: (cb) => ipcRenderer.on('close-request', () => cb()),
+  onOpenPaths: (cb) => ipcRenderer.on('open-paths', (_e, ps) => cb(ps))
+});

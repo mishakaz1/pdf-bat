@@ -1,0 +1,7 @@
+node_modules/
+dist/
+out/
+*.pdfbat-tmp
+.DS_Store
+test/shots/
+src/vendor/

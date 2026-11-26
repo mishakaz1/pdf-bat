@@ -1,0 +1,96 @@
+{
+  "name": "pdf-bat",
+  "productName": "PDF-Bat",
+  "version": "0.1.0",
+  "description": "PDF-Bat \u2014 a minimalist PDF reader and editor for studying and writing.",
+  "main": "main.js",
+  "author": "Mike",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/smoke.js",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "postinstall": "node scripts/vendor.js"
+  },
+  "devDependencies": {
+    "electron": "45.5.0",
+    "electron-builder": "26.18.0",
+    "@pdf-lib/fontkit": "1.1.1",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "4.10.38"
+  },
+  "build": {
+    "appId": "com.mishakaz1.pdfbat",
+    "productName": "PDF-Bat",
+    "copyright": "\u00a9 2026 Mike",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "tex.js",
+      "package.json",
+      "src/**/*",
+      "assets/**/*",
+      "build/icon.png",
+      "!**/*.map",
+      "!node_modules/**"
+    ],
+    "fileAssociations": [
+      {
+        "ext": "pdf",
+        "name": "PDF Document",
+        "role": "Viewer",
+        "mimeType": "application/pdf"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "identity": "-"
+    },
+    "dmg": {
+      "title": "PDF-Bat ${version}",
+      "artifactName": "PDF-Bat-${version}-${arch}.dmg"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "artifactName": "PDF-Bat-Setup-${version}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Office"
+    },
+    "publish": null
+  }
+}

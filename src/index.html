@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self' blob: data:">
+<title>PDF-Bat</title>
+<link rel="stylesheet" href="vendor/pdfjs/pdf_viewer.css">
+<link rel="stylesheet" href="styles.css">
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="vendor/fontkit.umd.min.js"></script>
+</head>
+<body>
+<header id="topbar">
+  <div class="brand"><span class="logo">◆</span> PDF-Bat</div>
+  <div class="seg" id="modeSwitch">
+    <button data-mode="read" class="on">Read</button>
+    <button data-mode="edit">Edit</button>
+  </div>
+  <div id="toolbar" class="toolbar"></div>
+  <div class="spacer"></div>
+  <div class="toolbar right">
+    <button id="btnOpen" class="icon" title="Open PDF (Ctrl+O)">＋ Open</button>
+    <button id="btnDarkPdf" class="icon" title="Dark pages">◐</button>
+    <button id="btnTheme" class="icon" title="Toggle theme (Ctrl+Shift+L)">☾</button>
+  </div>
+</header>
+<div id="main">
+  <aside id="sidebar">
+    <nav class="tabs" id="sideTabs"></nav>
+    <div id="sideBody"></div>
+  </aside>
+  <div id="sideResizer" class="resizer v"></div>
+  <section id="workspace">
+    <div id="panes"></div>
+    <div id="welcome">
+      <div class="welcome-card">
+        <div class="logo big">◆</div>
+        <h1>PDF-Bat</h1>
+        <p>Drop PDFs here or <a href="#" id="welcomeOpen">open a file</a>.</p>
+        <div id="recentList"></div>
+      </div>
+    </div>
+  </section>
+</div>
+<div id="toast"></div>
+<div id="modalRoot"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
