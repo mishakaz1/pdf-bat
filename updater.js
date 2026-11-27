@@ -1,9 +1,11 @@
 'use strict';
 // Automatic updates from GitHub Releases.
 //  * Windows: downloads the new installer in the background and installs it on quit (electron-updater).
-//  * macOS: the app is not signed by Apple yet, and macOS refuses to auto-replace unsigned apps,
-//    so we check GitHub, tell the user, and download the right .dmg with one click.
+//  * macOS: the app has no paid Apple signature, so Apple's updater can't be used; macupdate.js
+//    downloads the new version, checks it, and swaps the app bundle after PDF-Bat quits.
+//    If that is not possible (e.g. the app runs from the .dmg), we offer the .dmg download instead.
 const { app, dialog, shell, net } = require('electron');
+const mac = require('./macupdate');
 
 const OWNER = 'mishakaz1', REPO = 'pdf-bat';
 const SIX_HOURS = 6 * 3600 * 1000;
@@ -53,6 +55,27 @@ function setup({ getWindow, store, saveStore, send }) {
     } catch (e) { console.error('electron-updater unavailable', e); }
   }
 
+  let macReady = null, macBusy = false;
+  async function askRestartMac(version) {
+    const r = await dialog.showMessageBox(getWindow(), {
+      type: 'info', message: `PDF-Bat ${version.replace(/^v/, '')} is ready`,
+      detail: 'Restart now to update, or it will be installed when you quit.',
+      buttons: ['Restart now', 'Later'], defaultId: 0, cancelId: 1
+    });
+    if (r.response === 0) {
+      app.emit('pdfbat-before-update');
+      mac.scheduleSwap(macReady.newApp, true);
+      macReady.scheduled = true;
+      app.quit();
+    }
+  }
+  if (process.platform === 'darwin') {
+    // a downloaded update is installed when PDF-Bat quits, even if the user chose "Later"
+    app.on('will-quit', () => {
+      if (macReady && !macReady.scheduled) { macReady.scheduled = true; mac.scheduleSwap(macReady.newApp, false); }
+    });
+  }
+
   async function checkMac(manual) {
     const rel = await fetchJson(`https://api.github.com/repos/${OWNER}/${REPO}/releases/latest`);
     const latest = rel.tag_name;
@@ -62,6 +85,24 @@ function setup({ getWindow, store, saveStore, send }) {
       return;
     }
     notify({ status: 'available', version: latest });
+    const arch0 = process.arch === 'arm64' ? 'arm64' : 'x64';
+    if (macReady && macReady.version === latest) { if (manual) askRestartMac(latest); return; }
+    if (mac.canSelfUpdate(mac.appBundlePath()) && mac.pickZip(rel.assets || [], arch0)) {
+      if (macBusy) return;
+      macBusy = true;
+      try {
+        notify({ status: 'downloading', version: latest, percent: 0 });
+        let last = -1;
+        const newApp = await mac.prepare(rel, arch0, (f) => { const p = Math.round(f * 100); if (p !== last) { last = p; notify({ status: 'downloading', version: latest, percent: p }); } });
+        macReady = { version: latest, newApp };
+        notify({ status: 'ready', version: latest });
+        askRestartMac(latest);
+        return;
+      } catch (e) {
+        console.error('mac self-update failed, falling back to .dmg', e);
+        notify({ status: 'error', error: String(e.message || e) });
+      } finally { macBusy = false; }
+    }
     if (!manual && store.settings.skipVersion === latest) return;
     const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
     const asset = (rel.assets || []).find(a => a.name.endsWith(`-${arch}.dmg`)) || (rel.assets || []).find(a => a.name.endsWith('.dmg'));

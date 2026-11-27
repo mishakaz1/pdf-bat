@@ -1,6 +1,7 @@
-## PDF-Bat 0.4.1
+## PDF-Bat 0.4.2
 
-- New button at the far left of the top bar to show or hide the sidebar (same as Ctrl/Cmd+B). The choice is remembered.
-- Cleaner Contents for scanned books: lines of OCR noise (like "~ш Аг") are no longer shown as headings.
+**macOS now updates itself.** When a new version is out, PDF-Bat downloads it in the background, checks it, and asks to restart; choose Later and it is installed when you quit. Install 0.4.2 from the .dmg once; every update after that is automatic.
 
-Windows updates itself. macOS: download the .dmg below.
+(If PDF-Bat is started straight from the .dmg instead of from Applications, it still offers the .dmg download as before.)
+
+Windows updates itself as before.
