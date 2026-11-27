@@ -73,6 +73,13 @@ export class Pane {
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
         this.zoomBy(Math.exp(-e.deltaY * 0.0025), e);
+        return;
+      }
+      // touchpad: scroll straight down/up unless the swipe is clearly sideways (≥ 30° from vertical)
+      if (e.deltaX && wheelAxis(this._wheel || (this._wheel = {}), e) === 'v') {
+        e.preventDefault();
+        const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? this.scrollEl.clientHeight : 1;
+        this.scrollEl.scrollTop += e.deltaY * unit;
       }
     }, { passive: false });
     this.scrollEl.addEventListener('mouseup', (e) => this.onMouseUp(e));
@@ -929,4 +936,18 @@ export function hitTest(annots, page, px, py, tol, markupOnly = false) {
     }
   }
   return null;
+}
+
+// Decide once per touchpad gesture (events closer than 200 ms, including inertia) whether it is a
+// vertical scroll or a free one. Until ~6 px of movement are seen, treat it as vertical.
+export const WHEEL_FREE_ANGLE = 30;
+export function wheelAxis(st, e, now = performance.now()) {
+  if (!st.t || now - st.t > 200) { st.dx = 0; st.dy = 0; st.axis = null; }
+  st.t = now;
+  if (st.axis) return st.axis;
+  st.dx += Math.abs(e.deltaX); st.dy += Math.abs(e.deltaY);
+  if (st.dx + st.dy < 6) return 'v';
+  const deg = Math.atan2(st.dx, st.dy) * 180 / Math.PI; // 0 = straight down/up
+  st.axis = deg < WHEEL_FREE_ANGLE ? 'v' : 'free';
+  return st.axis;
 }
