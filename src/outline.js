@@ -84,6 +84,7 @@ async function detectHeadings(doc, onProgress) {
     if (kw && ratio >= 1.05) score += 1;
     if (!score) continue;
     if (/[.:;,]$/.test(t) && !kw && t.length > 40) continue; // sentence-like
+    if (!plausibleTitle(t, kw, num)) continue;             // OCR noise from scanned books
     cands.push(Object.assign({ score }, l));
   }
   // merge consecutive candidate lines on same page with same size (multi-line titles)
@@ -114,6 +115,21 @@ async function detectHeadings(doc, onProgress) {
     stack.push(item);
   }
   return root;
+}
+
+// Scanned books with an OCR text layer produce big-looking "lines" like "~ш Аг" or "I t H E )' 6{x)\ ш".
+// A real heading has a word of 3+ letters, is mostly letters, and is not a row of single characters.
+export function plausibleTitle(t, kw = false, num = false) {
+  const chars = t.replace(/[\s\d.,:;()\-–—]/g, ''); // digits and ordinary punctuation are fine in titles
+  const letters = (t.match(/\p{L}/gu) || []).length;
+  const words = t.split(/\s+/).filter(Boolean);
+  const singles = words.filter(w => w.length === 1).length;
+  const junk = (t.match(/[~{}\\|^`<>@$%&*_=]/g) || []).length;
+  if (!/\p{L}{3,}/u.test(t) && !kw && !(num && letters >= 2)) return false;
+  if (letters / Math.max(1, chars.length) < 0.6 && !num && !kw) return false;
+  if (words.length >= 3 && singles / words.length > 0.5) return false;
+  if (junk >= 2) return false;
+  return true;
 }
 
 function normalize(t) { return t.toLowerCase().replace(/\d+/g, '#').replace(/\s+/g, ' ').trim(); }
