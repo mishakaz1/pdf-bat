@@ -78,6 +78,7 @@ class App {
     $('#btnOpen').addEventListener('click', () => this.openDialog());
     $('#welcomeOpen').addEventListener('click', (e) => { e.preventDefault(); this.openDialog(); });
     $('#btnTheme').addEventListener('click', () => this.toggleTheme());
+    $('#btnSidebar').addEventListener('click', () => this.command('sidebar'));
     $('#btnDarkPdf').addEventListener('click', () => this.applyDarkPages(!this.settings.darkPages, true));
     $$('#modeSwitch button').forEach(b => b.addEventListener('click', () => this.setMode(b.dataset.mode)));
     window.bat.onMenu((cmd) => this.command(cmd));

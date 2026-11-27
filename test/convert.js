@@ -116,6 +116,12 @@ const SHOTS = path.join(__dirname, 'shots');
   const toastTxt = await win.evaluate(() => document.body.innerText);
   check((await win.evaluate(() => app.panes.length)) === before && /Could not convert broken\.epub/.test(toastTxt), 'broken file: clear message, nothing opened');
 
+  // sidebar button in the top bar
+  await win.click('#btnSidebar');
+  check(await win.evaluate(() => document.getElementById('sidebar').classList.contains('hidden')), 'top-bar button hides the sidebar');
+  await win.click('#btnSidebar');
+  check(await win.evaluate(() => !document.getElementById('sidebar').classList.contains('hidden')), 'and shows it again');
+
   check(errors.length === 0, 'no renderer errors ' + errors.join('; '));
   await app.close();
   console.log('   (electron exited)');
