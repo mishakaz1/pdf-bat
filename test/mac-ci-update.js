@@ -20,8 +20,12 @@ for (const arch of ['arm64', 'x64']) {
   const app = fs.readdirSync(unpack).find(n => n.endsWith('.app'));
   const plist = execFileSync('/usr/bin/plutil', ['-extract', 'CFBundleShortVersionString', 'raw', path.join(unpack, app, 'Contents', 'Info.plist')]).toString().trim();
   check(app === 'PDF-Bat.app' && plist === version, name + ': unpacks to PDF-Bat.app ' + plist);
-  execFileSync('/usr/bin/codesign', ['--verify', '--deep', path.join(unpack, app)]);
-  check(true, name + ': code signature intact after unpacking');
+  // the signature (ad-hoc, no Apple ID) must survive zip + ditto exactly as it is in the built app
+  const verify = (p) => { const r = spawnSync('/usr/bin/codesign', ['--verify', '--deep', '--strict', p]); return { status: r.status, msg: (r.stderr || '').toString().trim().split('\n').pop() }; };
+  const built = verify(path.join(dist, arch === 'arm64' ? 'mac-arm64' : 'mac', 'PDF-Bat.app'));
+  const unpacked = verify(path.join(unpack, app));
+  console.log(`   codesign built: ${built.status} ${built.msg} | unpacked: ${unpacked.status} ${unpacked.msg}`);
+  check(built.status === unpacked.status, name + ': code signature state same as the built app');
   // swap into a fake Applications folder
   const apps = fs.mkdtempSync(path.join(os.tmpdir(), 'apps-'));
   const old = path.join(apps, 'PDF-Bat.app'); fs.mkdirSync(path.join(old, 'Contents'), { recursive: true });
