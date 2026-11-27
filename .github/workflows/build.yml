@@ -39,12 +39,16 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: test -f dist/latest.yml && cat dist/latest.yml
+      - name: Check update metadata (macOS)
+        if: runner.os == 'macOS'
+        run: cat dist/latest-mac.yml && node test/mac-ci-update.js
       - name: Upload installers
         uses: actions/upload-artifact@v4
         with:
           name: PDF-Bat-${{ runner.os }}
           path: |
             dist/*.dmg
+            dist/*.zip
             dist/*.exe
             dist/*.blockmap
             dist/latest*.yml

@@ -1,15 +1,15 @@
 {
   "name": "pdf-bat",
   "productName": "PDF-Bat",
-  "version": "0.4.1",
-  "description": "PDF-Bat — a minimalist PDF reader and editor for studying and writing.",
+  "version": "0.4.2",
+  "description": "PDF-Bat \u2014 a minimalist PDF reader and editor for studying and writing.",
   "main": "main.js",
   "author": "Mike",
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
     "start": "electron .",
-    "test": "node test/smoke.js && node test/latex-ui.js && node test/center.js && node test/preview.js && node test/convert.js",
+    "test": "node test/smoke.js && node test/latex-ui.js && node test/center.js && node test/preview.js && node test/convert.js && node test/macupdate.js",
     "dist": "electron-builder",
     "dist:mac": "electron-builder --mac",
     "dist:win": "electron-builder --win",
@@ -25,7 +25,7 @@
   "build": {
     "appId": "com.mishakaz1.pdfbat",
     "productName": "PDF-Bat",
-    "copyright": "© 2026 Mike",
+    "copyright": "\u00a9 2026 Mike",
     "directories": {
       "output": "dist",
       "buildResources": "build"
@@ -40,7 +40,8 @@
       "assets/**/*",
       "build/icon.png",
       "!**/*.map",
-      "updater.js"
+      "updater.js",
+      "macupdate.js"
     ],
     "fileAssociations": [
       {
@@ -84,10 +85,18 @@
             "arm64",
             "x64"
           ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.png",
-      "identity": "-"
+      "identity": "-",
+      "artifactName": "PDF-Bat-${version}-${arch}-mac.${ext}"
     },
     "dmg": {
       "title": "PDF-Bat ${version}",
