@@ -1,7 +1,5 @@
-## PDF-Bat 0.4.2
+## PDF-Bat 0.4.3
 
-**macOS now updates itself.** When a new version is out, PDF-Bat downloads it in the background, checks it, and asks to restart; choose Later and it is installed when you quit. Install 0.4.2 from the .dmg once; every update after that is automatic.
+- Touchpad scrolling goes straight up and down unless you swipe clearly sideways (30° or more from vertical), so a zoomed-in page no longer drifts left and right while you read.
 
-(If PDF-Bat is started straight from the .dmg instead of from Applications, it still offers the .dmg download as before.)
-
-Windows updates itself as before.
+Updates itself on Windows and on macOS 0.4.2+.
